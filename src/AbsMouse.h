@@ -19,6 +19,8 @@ private:
 	uint8_t _buttons;
 	uint16_t _x;
 	uint16_t _y;
+	int8_t _scroll_x;
+	int8_t _scroll_y;
 	uint32_t _width;
 	uint32_t _height;
 	bool _autoReport;
@@ -30,6 +32,7 @@ public:
 	void move(uint16_t x, uint16_t y);
 	void press(uint8_t b = MOUSE_LEFT);
 	void release(uint8_t b = MOUSE_LEFT);
+	void scroll(int8_t scroll_x, int8_t scroll_y);
 };
 extern AbsMouse_ AbsMouse;
 

@@ -30,11 +30,25 @@ static const uint8_t HID_REPORT_DESCRIPTOR[] PROGMEM = {
 	0x75, 0x10,        //     Report Size (16)
 	0x95, 0x02,        //     Report Count (2)
 	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x05, 0x0C,        //     Usage Page (Consumer)
+	0x0A, 0x38, 0x02,  //     Usage (AC Pan)
+	0x15, 0x81,        //     Logical Minimum (-127)
+	0x25, 0x7F,        //     Logical Maximum (127)
+	0x75, 0x08,        //     Report Size (8),
+	0x95, 0x01,        //     Report Count (1)
+	0x81, 0x06,        //     Input (Data,Var,Rel)
+	0x05, 0x01,        //     Usage Page (Generic Desktop Ctrls)
+	0x09, 0x38,        //     Usage (Wheel)
+	0x15, 0x81,        //     Logical Minimum (-127)
+	0x25, 0x7F,        //     Logical Maximum (127)
+	0x75, 0x08,        //     Report Size (8)
+	0x95, 0x01,        //     Report Count (1)
+	0x81, 0x06,        //     Input (Data,Var,Rel)
 	0xC0,              //   End Collection
 	0xC0               // End Collection
 };
 
-AbsMouse_::AbsMouse_(void) : _buttons(0), _x(0), _y(0)
+AbsMouse_::AbsMouse_(void) : _buttons(0), _x(0), _y(0), _scroll_x(0), _scroll_y(0)
 {
 	static HIDSubDescriptor descriptorNode(HID_REPORT_DESCRIPTOR, sizeof(HID_REPORT_DESCRIPTOR));
 	HID().AppendDescriptor(&descriptorNode);
@@ -49,13 +63,17 @@ void AbsMouse_::init(uint16_t width, uint16_t height, bool autoReport)
 
 void AbsMouse_::report(void)
 {
-	uint8_t buffer[5];
+	uint8_t buffer[7];
 	buffer[0] = _buttons;
 	buffer[1] = _x & 0xFF;
 	buffer[2] = (_x >> 8) & 0xFF;
 	buffer[3] = _y & 0xFF;
 	buffer[4] = (_y >> 8) & 0xFF;
-	HID().SendReport(1, buffer, 5);
+	buffer[5] = _scroll_x;
+	buffer[6] = _scroll_y;
+	_scroll_x = 0;
+	_scroll_y = 0;
+	HID().SendReport(1, buffer, 7);
 }
 
 void AbsMouse_::move(uint16_t x, uint16_t y)
@@ -80,6 +98,16 @@ void AbsMouse_::press(uint8_t button)
 void AbsMouse_::release(uint8_t button)
 {
 	_buttons &= ~button;
+
+	if (_autoReport) {
+		report();
+	}
+}
+
+void AbsMouse_::scroll(int8_t scroll_x, int8_t scroll_y)
+{
+	_scroll_x = scroll_x;
+	_scroll_y = scroll_y;
 
 	if (_autoReport) {
 		report();

@@ -14,6 +14,7 @@ void loop() {
   AbsMouse.move(500, 200);
   AbsMouse.press(MOUSE_LEFT);
   AbsMouse.release(MOUSE_LEFT);
+  AbsMouse.scroll(125, -125);
   // do some other stuff
 }
 ```
